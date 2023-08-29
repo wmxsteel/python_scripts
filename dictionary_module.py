@@ -133,3 +133,12 @@ class bac_dictionary:
             return bac_values
         else:
             return None
+
+    def search_bac_dict_name(self, name):
+
+        df = self.df_asi
+       #bac_address_values = df[df["Name"] == name].values
+        # Filter rows where 'column_name' contains the substring 'apple'
+        result = df[df['Name'].str.contains(name)]
+        return result
+

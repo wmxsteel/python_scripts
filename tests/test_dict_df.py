@@ -83,5 +83,21 @@ class MyTestCase(unittest.TestCase):
 
         # Read the data from the Excel file
 
+    def test_search_bac_dict_name(self):
+        import dictionary_module as dm
+        import app_cli as app_cli
+        import modbus_module as modbus_module
+        modbus = modbus_module.ModbusRTUApp('COM3')
+        bac_dict = dm.bac_dictionary()
+
+        # search the bac dict by name
+        results = bac_dict.search_bac_dict_name(name="Motor")
+        print(results)
+
+        cli = app_cli.app_cli(app_modbus=modbus)
+        cli.print_tabulate_df(results)
+        # return as pandas dataframe
+        # send to CLI and print as tabuate table
+
 if __name__ == '__main__':
     unittest.main()
