@@ -1,4 +1,5 @@
 from pymodbus.client import ModbusSerialClient
+import dictionary_module as dictionary
 
 
 class ModbusRTUApp:
@@ -49,8 +50,12 @@ class ModbusRTUApp:
             bytesize=self.bytesize
         )
 
-    def read_holding_registers(self, address, count, slave):
+    def read_holding_registers(self, address, count):
         """Read Modbus RTU holding registers."""
+
+        # Append read values to a dictionary
+        read_holding_registers_dict = {}
+
         if not self.client.is_socket_open():
             self.client.connect()
 
@@ -58,8 +63,16 @@ class ModbusRTUApp:
 
         if not response.isError():
             for idx, value in enumerate(response.registers):
-                print(f"Address {address + idx}: {value}")
+                # TODO: Feed into dictionary parser
+                read_holding_registers_dict[address + idx] = value
+               # print(f"Address {address + idx}: {value}")
         else:
             print("Error reading Modbus data.")
 
         self.client.close()
+
+        if not read_holding_registers_dict:
+            return None
+        else:
+            return read_holding_registers_dict
+
