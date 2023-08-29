@@ -26,10 +26,13 @@ def init_cli(app_modbus):
     # initialize cli
     app_cli = cli.app_cli(app_modbus)
     return app_cli
+
+
 def main(app_cli):
     # main function
     app_cli.interactive_mode()
 
+# main
 get_serialPort = init_serial()
 app_modbus = init_modbus(get_serialPort)
 app_cli = init_cli(app_modbus)

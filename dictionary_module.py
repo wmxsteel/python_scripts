@@ -24,17 +24,21 @@ class bac_dictionary:
     def lookup_row_by_address(self, address):
         """Lookup rows in a DataFrame based on the Address column."""
         df = self.df_asi
-        asi_parameter_values: ExtensionArray | ndarray | Any = df[df["Address"] == address].values
-        # return as a dict
+        try:
+            row = df.loc[df["Address"] == address].iloc[0]
+        except IndexError:
+            # Address not found in the DataFrame
+            return None
+
         dict_asi_parameter_values = {
-            "address": asi_parameter_values[0][0],
-            "name": asi_parameter_values[0][1],
-            "scale": asi_parameter_values[0][2],
-            "units": asi_parameter_values[0][3],
-            "description": asi_parameter_values[0][4],
-            "key": asi_parameter_values[0][5],
-            "access_level": asi_parameter_values[0][6],
-            "bitfield": asi_parameter_values[0][7]
+            "address": row["Address"],
+            "name": row.get("Name", None),
+            "scale": row.get("Scale", None),
+            "units": row.get("Units", None),
+            "description": row.get("Description", None),
+            "key": row.get("Key", None),
+            "access_level": row.get("Access Level", None),
+            "bitfield": row.get("Bitfield", None)
         }
 
         return dict_asi_parameter_values
@@ -92,8 +96,6 @@ class bac_dictionary:
 
         return bac_values_dict
 
-        return parsed_values
-
     def get_values_from_address(self, address):
         """
         Function to lookup a row in the DataFrame based on the Address column.
@@ -131,4 +133,3 @@ class bac_dictionary:
             return bac_values
         else:
             return None
-

@@ -1,5 +1,4 @@
 from pymodbus.client import ModbusSerialClient
-import dictionary_module as dictionary
 
 
 class ModbusRTUApp:
@@ -11,7 +10,7 @@ class ModbusRTUApp:
         self.stopbits = 1
         self.bytesize = 8
 
-        self.slave = 1
+        self.slave = 2
         # Initialize Modbus client with the default parameters
         self.client = ModbusSerialClient(
             port=self.port,
@@ -33,7 +32,7 @@ class ModbusRTUApp:
 
         return port, baudrate, parity, stopbits, bytesize, slave
 
-    def set_serial_parameters(self, port, baudrate, parity, stopbits, bytesize, slave, ModbusSerialClient):
+    def set_serial_parameters(self, port, baudrate, parity, stopbits, bytesize, slave, modbusSerialClient):
         self.port = port
         self.baudrate = baudrate
         self.parity = parity
@@ -41,7 +40,7 @@ class ModbusRTUApp:
         self.bytesize = bytesize
         self.slave = slave
 
-        client = ModbusSerialClient(
+        client = modbusSerialClient(
             method='rtu',
             port=self.port,
             baudrate=self.baudrate,
@@ -49,6 +48,54 @@ class ModbusRTUApp:
             stopbits=self.stopbits,
             bytesize=self.bytesize
         )
+
+        self.client = client
+
+    def modbus_handler(self, address, command, count=1, value=0):
+        """Handle Modbus RTU commands."""
+        holding_registers_dict = {}
+        response = None
+
+        # Connect to the serial port
+        try:
+            if not self.client.is_socket_open():
+                self.client.connect()
+        except:
+            print("Error connecting to serial port.")
+            return None
+        else:
+            print("Connected to serial port.")
+        finally:
+            print("Done.")
+
+        # Handle commands
+        match command:
+            case "read single":
+                response = self.client.write_registers(address, count=1, slave=self.slave)
+                holding_registers_dict["mode"] = "read"
+            case "read multiple":
+                response = self.client.read_holding_registers(address, count, slave=self.slave)
+                holding_registers_dict["mode"] = "read"
+            case "write single":
+                response = self.client.write_registers(address, value, slave=self.slave)
+                holding_registers_dict["mode"] = "write"
+            case "write multiple":
+                response = self.client.write_registers(address, value, slave=self.slave)
+                holding_registers_dict["mode"] = "write"
+
+        if not response.isError():
+            for idx, value in enumerate(response.registers):
+                # TODO: Feed into dictionary parser
+                holding_registers_dict[address + idx] = value
+        else:
+            print("Error reading Modbus data.")
+
+        self.client.close()
+
+        if not holding_registers_dict:
+            return None
+        else:
+            return holding_registers_dict
 
     def read_holding_registers(self, address, count):
         """Read Modbus RTU holding registers."""
@@ -65,7 +112,9 @@ class ModbusRTUApp:
             for idx, value in enumerate(response.registers):
                 # TODO: Feed into dictionary parser
                 read_holding_registers_dict[address + idx] = value
-               # print(f"Address {address + idx}: {value}")
+            # print(f"Address {address + idx}: {value}")
+            read_holding_registers_dict["mode"] = "read"
+
         else:
             print("Error reading Modbus data.")
 
@@ -76,3 +125,42 @@ class ModbusRTUApp:
         else:
             return read_holding_registers_dict
 
+    def write_single_register(self, address, value):
+        """Write a single Modbus RTU holding register."""
+
+        # Append read values to a dictionary
+        write_single_register_dict = {}
+
+        if not self.client.is_socket_open():
+            self.client.connect()
+
+        # Get the scale value from the dictionary
+
+        response = self.client.write_registers(address, value, slave=self.slave)
+
+        if not response.isError():
+            for idx, value in enumerate(response.registers):
+                write_single_register_dict[address + idx] = value
+            write_single_register_dict["mode"] = "write"
+            return write_single_register_dict
+            # print(f"Address {address + idx}: {value}")
+
+    def write_holding_registers(self, address, count, value):
+        """Write Modbus RTU holding registers."""
+
+        # Append read values to a dictionary
+        write_holding_registers_dict = {}
+
+        if not self.client.is_socket_open():
+            self.client.connect()
+
+        response = self.client.write_registers(address, count, value, slave=self.slave)
+
+        if not response.isError():
+            for idx, value in enumerate(response.registers):
+                write_holding_registers_dict[address + idx] = value
+            write_holding_registers_dict["mode"] = "write"
+            return write_holding_registers_dict
+            # print(f"Address {address + idx}: {value}")
+        else:
+            print("Error writing Modbus data.")
