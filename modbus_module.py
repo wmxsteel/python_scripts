@@ -54,8 +54,28 @@ class ModbusCustom:
 
         return message
 
+    def parse_modbus_frame_msg(self, frame):
+        # Byte-by-byte parsing
 
+        # Extracting each part of the message
+        slave_address = frame[0]
+        function_code = frame[1]
+        byte_count = frame[2]
+        data_part = frame[3:3 + byte_count]
+        crc = frame[3 + byte_count:3 + byte_count + 2]
 
+        parsed_data = {
+            "Slave Address": slave_address,
+            "Function Code": function_code,
+            "Byte Count": byte_count,
+            "Data": data_part,
+            "CRC": crc
+        }
+        # Converting the data part to an integer
+        data_value_int = int.from_bytes(parsed_data['Data'], byteorder='big')
+        parsed_data['Data'] = data_value_int
+        print(parsed_data['Data'])
+        return parsed_data
     # Read the response (we're assuming a response with count * 2 bytes of data + 5 bytes overhead)
     #       response = ser.read(5 + count * 2)
 

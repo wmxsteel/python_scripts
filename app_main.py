@@ -43,6 +43,7 @@ def main(app_cli):
 
 
 # main
+print("ERacePro ASI BAC Python APP")
 get_serialPort = init_serial()
 app_modbus = init_modbus(get_serialPort)
 app_cli = init_cli(app_modbus)
