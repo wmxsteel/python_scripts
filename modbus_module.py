@@ -1,4 +1,68 @@
 from pymodbus.client import ModbusSerialClient
+import struct
+import serial
+
+
+class ModbusCustom:
+
+    def __init__(self):
+        pass
+
+    def calculate_crc(self, data):
+        """Calculate CRC-16 for Modbus.
+        @param data:
+        @return:
+        """
+        crc = 0xFFFF
+        for byte in data:
+            crc ^= byte
+            for _ in range(8):
+                if crc & 0x0001:
+                    crc >>= 1
+                    crc ^= 0xA001
+                else:
+                    crc >>= 1
+        return crc
+
+    def build_read_holding_registers(self, slave_address, start_address, count):
+        # Frame the modbus request
+        function_code = 0x03
+        message = struct.pack('>B B H H', slave_address, function_code, start_address, count)
+
+        # Append CRC to the message
+        crc = self.calculate_crc(message)
+        message += struct.pack('<H', crc)
+
+        return message
+
+        # Send the request over serial port
+
+    def build_write_holding_registers(self, slave_address, start_address, values):
+        # Frame the modbus request
+        function_code = 0x10
+        quantity = len(values)
+        byte_count = quantity * 2
+        message = struct.pack('>B B H H B', slave_address, function_code, start_address, quantity, byte_count)
+
+        # Add the register values to the message
+        for value in values:
+            message += struct.pack('>H', value)
+
+        # Append CRC to the message
+        crc = self.calculate_crc(message)
+        message += struct.pack('<H', crc)
+
+        return message
+
+
+
+    # Read the response (we're assuming a response with count * 2 bytes of data + 5 bytes overhead)
+    #       response = ser.read(5 + count * 2)
+
+    # Extract and return the data part of the response (excluding address, function code, byte count, and CRC)
+
+
+#       return response[3:-2]
 
 
 class ModbusRTUApp:
