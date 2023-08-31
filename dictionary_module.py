@@ -137,8 +137,49 @@ class bac_dictionary:
     def search_bac_dict_name(self, name):
 
         df = self.df_asi
-       #bac_address_values = df[df["Name"] == name].values
+        # bac_address_values = df[df["Name"] == name].values
         # Filter rows where 'column_name' contains the substring 'apple'
         result = df[df['Name'].str.contains(name)]
         return result
 
+    def build_bitvector(self, address):
+        # address is a int value
+        df = self.df_asi
+        result = df[df['Address'].str.contains(address)]
+
+        bac_address_values = df[df["Address"] == address].values
+        self.temp_bac_parameters = bac_address_values
+
+    def print_bit_vector_from_address(self, start_address=None, end_address=None):
+        df = self.df_asi
+
+        # If a start address is provided, filter the DataFrame to start from that address
+        if start_address is not None:
+            df = df[df['Address'] >= start_address]
+
+            # Iterate over the rows of the DataFrame
+        output = []
+        for index, row in df.iterrows():
+            # Check the conditions for the start of the bit vector
+            if float(row['Address']).is_integer() and row['Scale'] == 'bit vector' and row['Bitfield'] == '{}':
+                # if we located the start of a bit vector, skip the bit vector row
+                # and print the next 16 rows
+                index += 1
+                bit_row = df.iloc[index]  # get the next row
+                # Print the next 16 rows
+                max_range = 17
+                for i in range(max_range):
+                    # Ensure we're not exceeding DataFrame bounds
+                    bitvector = bit_row['Bitfield']
+
+                    if bitvector < 16:
+                        bit_row = df.iloc[index + i]
+                        name = bit_row['Name']
+                        bitname = f"Bit {bit_row['Bitfield']}: {name}"
+
+                        output_str = f"Address: {bit_row['Address']}, {bitname}"
+                        output.append(output_str)
+                        print(output_str)
+                # Break after printing one bit vector to avoid overlapping
+                break
+        return output

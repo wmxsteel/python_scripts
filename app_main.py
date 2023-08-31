@@ -9,6 +9,7 @@ log = setup_logging('app.log', output_console=False)
 def init_serial():
     # get serial port
     available_ports = init.list_serial_ports()
+
     if available_ports:
 
         # get the serial port

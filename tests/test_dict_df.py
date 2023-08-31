@@ -99,5 +99,37 @@ class MyTestCase(unittest.TestCase):
         # return as pandas dataframe
         # send to CLI and print as tabuate table
 
+    def test_search_bac_dict_address(self):
+        import dictionary_module as dm
+        import app_cli as app_cli
+        import modbus_module as modbus_module
+        modbus = modbus_module.ModbusRTUApp('COM3')
+        bac_dict = dm.bac_dictionary()
+
+        # search the bac dict by name
+        results = bac_dict.search_bac_dict_address(address=8)
+        print(results)
+
+        cli = app_cli.app_cli(app_modbus=modbus)
+        cli.print_tabulate_df(results)
+
+    def test_build_bitvector(self):
+        import dictionary_module as dm
+        import app_cli as app_cli
+        import modbus_module as modbus_module
+        modbus = modbus_module.ModbusRTUApp('COM3')
+        bac_dict = dm.bac_dictionary()
+
+        # search the bac dict by name
+        results = bac_dict.print_bit_vector_from_address(start_address=6.0, end_address=8)
+        print(results)
+
+        results = bac_dict.print_bit_vector_from_address(start_address=58.0, end_address=62)
+        print(results)
+
+
+     #   cli = app_cli.app_cli(app_modbus=modbus)
+     #   cli.print_tabulate_df(results)
+
 if __name__ == '__main__':
     unittest.main()

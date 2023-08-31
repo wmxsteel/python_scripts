@@ -119,7 +119,7 @@ class ModbusRTUApp:
         """Handle Modbus RTU commands."""
         holding_registers_dict = {}
         response = None
-
+        mode = ""
         # Connect to the serial port
         try:
             if not self.client.is_socket_open():
@@ -136,21 +136,26 @@ class ModbusRTUApp:
         match command:
             case "read single":
                 response = self.client.write_registers(address, count=1, slave=self.slave)
-                holding_registers_dict["mode"] = "read"
+                mode = "read"
             case "read multiple":
                 response = self.client.read_holding_registers(address, count, slave=self.slave)
-                holding_registers_dict["mode"] = "read"
+                mode = "read"
             case "write single":
                 response = self.client.write_registers(address, value, slave=self.slave)
-                holding_registers_dict["mode"] = "write"
+                mode = "write"
             case "write multiple":
                 response = self.client.write_registers(address, value, slave=self.slave)
-                holding_registers_dict["mode"] = "write"
+                mode = "write"
 
         if not response.isError():
             for idx, value in enumerate(response.registers):
                 # TODO: Feed into dictionary parser
                 holding_registers_dict[address + idx] = value
+            else:
+                holding_registers_dict[address] = value
+
+            holding_registers_dict["mode"] = mode
+
         else:
             print("Error reading Modbus data.")
 
@@ -228,3 +233,15 @@ class ModbusRTUApp:
             # print(f"Address {address + idx}: {value}")
         else:
             print("Error writing Modbus data.")
+
+    def encode_modbus_msg(self, slave_address, address, values):
+        from pymodbus.register_write_message import WriteMultipleRegistersRequest
+
+
+        # Create a Modbus request to write multiple registers
+        request = WriteMultipleRegistersRequest(address, values)
+
+        # Convert the request to a byte frame
+        frame = request.encode()
+
+        return frame
