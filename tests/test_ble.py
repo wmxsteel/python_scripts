@@ -69,7 +69,6 @@ class MyTestCase(unittest.TestCase):
         read_modbus_msg = modbus.build_read_holding_registers(1, 0, 1)
         controller_output_msg = read_modbus_msg
 
-        send_uuid = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'
 
         asyncio.run(ble.run(address, rx_uuid, tx_uuid, race_throttle_power, controller_output_msg))
 

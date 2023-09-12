@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "python-scripts"
+version = "0.1.0"
+description = ""
+authors = ["wmxsteel <112781450+wmxsteel@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "python_scripts"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+termcolor = "^2.3.0"
+tabulate = "^0.9.0"
+pymodbus = "^3.5.2"
+pyserial = "^3.5"
+asyncio = "^3.4.3"
+pandas = "^2.1.0"
+openpyxl = "^3.1.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
